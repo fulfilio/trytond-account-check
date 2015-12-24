@@ -2,8 +2,6 @@
 """
     check.py
 
-    :copyright: (c) 2014 by Openlabs Technologies & Consulting (P) Limited
-    :license: BSD, see LICENSE for more details.
 """
 from num2words import num2words
 from itertools import groupby
