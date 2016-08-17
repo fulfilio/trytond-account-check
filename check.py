@@ -216,10 +216,8 @@ class RunCheckStart(ModelView):
     @fields.depends('journal')
     def on_change_journal(self):
         if self.journal:
-            return {
-                'next_number': self.journal.check_number_sequence.number_next
-            }
-        return {'next_number': None}
+            self.next_number = self.journal.check_number_sequence.number_next
+        self.next_number = None
 
 
 class RunCheck(Wizard):
