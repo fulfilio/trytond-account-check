@@ -115,9 +115,7 @@ class AccountMove:
 
     @fields.depends('journal')
     def on_change_journal(self):
-        return {
-            'enable_check_printing': self.get_enable_check_printing(None),
-        }
+            self.enable_check_printing = self.get_enable_check_printing(None)
 
     @classmethod
     @ModelView.button
