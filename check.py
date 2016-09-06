@@ -46,18 +46,22 @@ class ReportMixin(Report):
         return ('{:*<%d}' % length).format(amount_in_words)
 
     @classmethod
-    def parse(cls, report, records, data, localcontext):
+    def get_context(cls, records, data):
         """
         Add amount_to_words to localcontext
         """
-        localcontext.update({
+        report_context = super(ReportMixin, cls).get_context(records, data)
+        report_context.update({
             'amount_to_words': lambda *args, **kargs: cls.amount_to_words(
                 *args, **kargs)
         })
 
-        return super(ReportMixin, cls).parse(
-            report, records, data, localcontext
-        )
+        return report_context
+
+    @classmethod
+    def render(cls, report, report_context):
+        report = report_context['report']
+        return super(ReportMixin, cls).render(report, report_context)
 
 
 class Check(ReportMixin):
@@ -65,10 +69,12 @@ class Check(ReportMixin):
     __name__ = 'account.move.check'
 
     @classmethod
-    def parse(cls, report, records, data, localcontext):
+    def get_context(cls, records, data):
         """
         Replace the report with the report selected in Account Move
         """
+        report_context = super(Check, cls).get_context(records, data)
+
         if len(records) > 1:
             raise UserError(
                 "This report can only be generated for 1 record at a time"
@@ -89,10 +95,8 @@ class Check(ReportMixin):
             )
 
         # Use Account Move's check template
-        report = move.journal.check_template
-        return super(Check, cls).parse(
-            report, records, data, localcontext
-        )
+        report_context['report'] = move.journal.check_template
+        return report_context
 
 
 class CheckPrinting(ReportMixin):
@@ -102,15 +106,15 @@ class CheckPrinting(ReportMixin):
     __name__ = 'account.move.check_printing'
 
     @classmethod
-    def parse(cls, report, records, data, localcontext):
+    def get_context(cls, records, data):
         AccountMove = Pool().get('account.move')
         AccountJournal = Pool().get('account.journal')
 
-        records = [AccountMove(m) for m in data['moves']]
-        report = AccountJournal(data['journal']).check_template
-        return super(CheckPrinting, cls).parse(
-            report, records, data, localcontext
-        )
+        report_context = super(CheckPrinting, cls).get_context(records, data)
+        report_context['records'] = [AccountMove(m) for m in data['moves']]
+        report_context['report'] = \
+            AccountJournal(data['journal']).check_template
+        return report_context
 
 
 class CheckPrintingWizardStart(ModelView):
