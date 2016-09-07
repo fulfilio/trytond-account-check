@@ -221,7 +221,8 @@ class RunCheckStart(ModelView):
     def on_change_journal(self):
         if self.journal:
             self.next_number = self.journal.check_number_sequence.number_next
-        self.next_number = None
+        else:
+            self.next_number = None
 
 
 class RunCheck(Wizard):
