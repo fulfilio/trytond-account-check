@@ -81,7 +81,7 @@ major_version = int(major_version)
 minor_version = int(minor_version)
 
 requires = [
-    'num2words'
+    'num2words==0.5.3'
 ]
 
 MODULE2PREFIX = {}
