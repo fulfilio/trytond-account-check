@@ -75,27 +75,40 @@ class Check(ReportMixin):
         """
         report_context = super(Check, cls).get_context(records, data)
 
-        if len(records) > 1:
-            raise UserError(
-                "This report can only be generated for 1 record at a time"
-            )
-        move = records[0]
+        # Sort by check number so the moves are printed in the same
+        # order in a combined damn PDF
+        records = sorted(records, key=lambda move: move.check_number)
 
-        if not move.enable_check_printing:
+        for move in records:
+            if not move.enable_check_printing:
+                raise UserError(
+                    "Check Printing not enabled for Account Move %s.",
+                    (move.number, )
+                )
+            if not move.check_number:
+                raise UserError(
+                    "Check Number not valid. Is move %s a check?",
+                    (move.number, )
+                )
+            if not move.state == 'posted':
+                raise UserError(
+                    "You must Post the move %s before printing check.",
+                    (move.number, )
+                )
+
+        reports = set()
+        for move in records:
+            reports.add(move.journal.check_template)
+
+        if len(reports) > 1:
             raise UserError(
-                "Check Printing not enabled for this Account Move."
-            )
-        if not move.check_number:
-            raise UserError(
-                "Check Number not valid."
-            )
-        if not move.state == 'posted':
-            raise UserError(
-                "You must Post the move before printing check."
+                "Checks selected use different templates. " +
+                "Please print them separately."
             )
 
         # Use Account Move's check template
         report_context['report'] = move.journal.check_template
+        report_context['records'] = records
         return report_context
 
 
