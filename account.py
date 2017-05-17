@@ -194,13 +194,13 @@ class AccountMove:
         Returns the credit and debit lines for checks
         """
         if not self.enable_check_printing:
-            return None
+            return []
 
         if name == 'check_debit_lines':
             return map(int, filter(lambda l: l.debit, self.lines))
         elif name == 'check_credit_lines':
             return map(int, filter(lambda l: l.credit, self.lines))
-        return None
+        return []
 
 
 class AccountMoveLine:
