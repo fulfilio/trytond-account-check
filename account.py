@@ -184,10 +184,6 @@ class AccountMove:
             self.raise_user_error(
                 "There can be only 1 Debit Line."
             )
-        elif not debit_lines[0].party:
-            self.raise_user_error(
-                "There must be a Party defined on the Debit Line."
-            )
 
     def get_check_lines(self, name):
         """
@@ -197,7 +193,13 @@ class AccountMove:
             return []
 
         if name == 'check_debit_lines':
-            return map(int, filter(lambda l: l.debit, self.lines))
+            return map(
+                int,
+                filter(
+                    lambda l: l.debit and l.account.kind in ('receivable', 'payable'),
+                    self.lines
+                )
+            )
         elif name == 'check_credit_lines':
             return map(int, filter(lambda l: l.credit, self.lines))
         return []
